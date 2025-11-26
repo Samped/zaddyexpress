@@ -366,7 +366,7 @@ export default function Home() {
                     Real-Time Tracking
                   </h3>
                   <p className="text-[#5C4033]/80 text-sm leading-relaxed">
-                    Live updates on your ride's location and status. Know exactly where your rider is and when they'll arrive.
+                    Live updates on your ride&apos;s location and status. Know exactly where your rider is and when they&apos;ll arrive.
                   </p>
                 </div>
               </div>

@@ -89,7 +89,7 @@ function LoginForm() {
               href="/signup"
               className="block w-full text-center text-gray-600 hover:text-gray-800 mt-4"
             >
-              Don't have an account? Sign up
+              Don&apos;t have an account? Sign up
             </Link>
           </div>
           </div>
