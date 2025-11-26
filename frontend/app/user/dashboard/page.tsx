@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { MapPin, Search, DollarSign, User, Mail, Phone, Calendar, Clock, CheckCircle, XCircle, ArrowRight } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 import Footer from '@/components/Footer'
@@ -324,10 +325,13 @@ export default function UserDashboard() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative">
                 {userProfile.profilePicture ? (
-                  <img
+                  <Image
                     src={userProfile.profilePicture}
                     alt={userProfile.name || 'User'}
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full object-cover border-4 border-green-500 shadow-lg"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center border-4 border-green-500 shadow-lg">

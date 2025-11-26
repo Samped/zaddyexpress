@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { CreditCard, Building2 } from 'lucide-react'
 
 export default function PaymentPage() {
@@ -23,11 +23,7 @@ export default function PaymentPage() {
     bankName: '',
   })
 
-  useEffect(() => {
-    fetchOrder()
-  }, [orderId])
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order/${orderId}`, {
         headers: {
@@ -41,7 +37,11 @@ export default function PaymentPage() {
     } catch (error) {
       console.error('Error fetching order:', error)
     }
-  }
+  }, [orderId])
+
+  useEffect(() => {
+    fetchOrder()
+  }, [orderId, fetchOrder])
 
   const handlePayment = async () => {
     setLoading(true)

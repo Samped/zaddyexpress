@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Power, DollarSign, TrendingUp, MessageSquare, Phone, MapPin, User, Mail, Calendar, Star } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 import Footer from '@/components/Footer'
@@ -215,10 +216,13 @@ export default function RiderDashboard() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative">
                 {riderProfile.userId.profilePicture ? (
-                  <img
+                  <Image
                     src={riderProfile.userId.profilePicture}
                     alt={riderProfile.userId.name || 'Rider'}
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full object-cover border-4 border-green-500 shadow-lg"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center border-4 border-green-500 shadow-lg">

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Upload, Camera } from 'lucide-react'
 
 export default function KYCPage() {
@@ -180,10 +181,13 @@ export default function KYCPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <img
+                  <Image
                     src={faceImage}
                     alt="Face capture"
+                    width={400}
+                    height={300}
                     className="w-full rounded-lg border border-gray-300"
+                    unoptimized
                   />
                   <button
                     onClick={() => setFaceImage(null)}

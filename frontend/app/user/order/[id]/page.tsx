@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Phone, MessageSquare, MapPin, DollarSign, Star } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 import Footer from '@/components/Footer'
@@ -18,6 +18,22 @@ export default function OrderPage() {
   const [newMessage, setNewMessage] = useState('')
   const [riderLocation, setRiderLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [inCall, setInCall] = useState(false)
+
+  const fetchOrder = useCallback(async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order/${orderId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setOrder(data.order)
+      }
+    } catch (error) {
+      console.error('Error fetching order:', error)
+    }
+  }, [orderId])
 
   useEffect(() => {
     // Initialize socket connection
@@ -48,23 +64,7 @@ export default function OrderPage() {
     return () => {
       newSocket.disconnect()
     }
-  }, [orderId])
-
-  const fetchOrder = async () => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setOrder(data.order)
-      }
-    } catch (error) {
-      console.error('Error fetching order:', error)
-    }
-  }
+  }, [orderId, fetchOrder])
 
   const sendMessage = () => {
     if (!newMessage.trim() || !socket) return

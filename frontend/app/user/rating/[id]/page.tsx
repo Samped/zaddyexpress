@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Star } from 'lucide-react'
 
 export default function RatingPage() {
@@ -14,11 +14,7 @@ export default function RatingPage() {
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    fetchOrder()
-  }, [orderId])
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order/${orderId}`, {
         headers: {
@@ -32,7 +28,11 @@ export default function RatingPage() {
     } catch (error) {
       console.error('Error fetching order:', error)
     }
-  }
+  }, [orderId])
+
+  useEffect(() => {
+    fetchOrder()
+  }, [orderId, fetchOrder])
 
   const handleSubmit = async () => {
     if (rating === 0) {
