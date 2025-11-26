@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  USER
+  RIDER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CARD
+}
+
+enum RiderStatus {
+  ONLINE
+  OFFLINE
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String?   @unique
+  phone         String?   @unique
+  password      String
+  userType      UserType  @default(USER)
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // User specific
+  orders        Order[]
+  ratings       Rating[]
+  
+  // Rider specific
+  riderProfile  RiderProfile?
+  riderOrders   Order[]    @relation("RiderOrders")
+  earnings      Transaction[]
+  
+  // KYC
+  kycVerified   Boolean   @default(false)
+  nin           String?
+  faceRecognitionData String?
+}
+
+model RiderProfile {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @unique @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        RiderStatus @default(OFFLINE)
+  totalEarnings Float     @default(0)
+  availableBalance Float  @default(0)
+  rating        Float     @default(0)
+  totalRides    Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  withdrawals   Withdrawal[]
+}
+
+model Order {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String        @db.ObjectId
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  riderId         String?       @db.ObjectId
+  rider           User?         @relation("RiderOrders", fields: [riderId], references: [id])
+  status          OrderStatus   @default(PENDING)
+  pickupAddress   String
+  dropoffAddress  String
+  pickupLat       Float
+  pickupLng       Float
+  dropoffLat      Float
+  dropoffLng      Float
+  basePrice       Float
+  bidPrice        Float
+  finalPrice      Float?
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  payments        Payment[]
+  tracking        Tracking[]
+  rating          Rating?
+}
+
+model Payment {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String        @db.ObjectId
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount        Float
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  transaction   Transaction?
+}
+
+model Transaction {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  riderId       String    @db.ObjectId
+  rider         User      @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  paymentId     String?   @unique @db.ObjectId
+  payment       Payment?  @relation(fields: [paymentId], references: [id])
+  amount        Float
+  type          String    // EARNINGS, WITHDRAWAL
+  status        String    // PENDING, COMPLETED, FAILED
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Withdrawal {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  riderId       String    @db.ObjectId
+  riderProfile  RiderProfile @relation(fields: [riderId], references: [id], onDelete: Cascade)
+  amount        Float
+  status        String    // PENDING, COMPLETED, FAILED
+  bankAccount   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Rating {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String    @unique @db.ObjectId
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  riderId       String    @db.ObjectId
+  rating        Int       // 1-5
+  comment       String?
+  createdAt     DateTime  @default(now())
+}
+
+model Tracking {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String    @db.ObjectId
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lat           Float
+  lng           Float
+  status        String
+  createdAt     DateTime  @default(now())
+}
+
+model Notification {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String    @db.ObjectId
+  type          String    // ORDER_REQUEST, ORDER_ACCEPTED, ORDER_COMPLETED, etc.
+  title         String
+  message       String
+  read          Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+}
+
